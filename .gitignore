@@ -1,0 +1,14 @@
+# Temporary files
+*.log
+*.raw
+*.out
+*.tmp
+*~
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db

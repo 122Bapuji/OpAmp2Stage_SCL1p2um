@@ -1,0 +1,17 @@
+================================================================================
+SCL 1.2 um CMOS TWO-STAGE OP-AMP - POWER SUPPLY REJECTION RATIO (PSRR) REPORT
+================================================================================
+Differential-Mode DC Gain (Ad0) : 70.26 dB
+VDD Gain (Avdd0)                 : -29.67 dB
+VSS Gain (Avss0)                 : -14.61 dB
+DC PSRR+ (Ad0 - Avdd0)           : 99.93 dB (Target >= 60 dB) -> MET
+DC PSRR- (Ad0 - Avss0)           : 84.87 dB (Target >= 60 dB) -> MET
+PSRR+ @ 1 kHz                    : 98.46 dB
+PSRR+ @ 10 kHz                   : 83.78 dB
+PSRR+ @ 100 kHz                  : 63.89 dB
+PSRR+ @ 1 MHz                    : 43.91 dB
+PSRR- @ 1 kHz                    : 79.80 dB
+PSRR- @ 10 kHz                   : 61.40 dB
+PSRR- @ 100 kHz                  : 41.42 dB
+PSRR- @ 1 MHz                    : 21.41 dB
+================================================================================

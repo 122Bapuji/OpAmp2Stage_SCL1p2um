@@ -1,0 +1,33 @@
+** sch_path: /mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/xschem/opamp_2stage.sch
+.subckt opamp_2stage INP INM VOUT VDD VSS
+*.ipin INP
+*.ipin INM
+*.opin VOUT
+*.ipin VDD
+*.ipin VSS
+MM8 vbp vbp VDD VDD P L=5.0u W=40u ad=1.56e-10 as=1.56e-10 pd=8.78e-05 ps=8.78e-05 nrd=0.04875 nrs=0.04875
+MM5 tail vbp VDD VDD P L=5.0u W=40u ad=1.56e-10 as=1.56e-10 pd=8.78e-05 ps=8.78e-05 nrd=0.04875 nrs=0.04875
+MM1 net1 INM tail VDD P L=3.0u W=120u ad=4.68e-10 as=4.68e-10 pd=0.0002478 ps=0.0002478 nrd=0.01625 nrs=0.01625
+MM2 out1 INP tail VDD P L=3.0u W=120u ad=4.68e-10 as=4.68e-10 pd=0.0002478 ps=0.0002478 nrd=0.01625 nrs=0.01625
+MM3 net1 net1 VSS VSS N L=4.0u W=20u ad=7.8e-11 as=7.8e-11 pd=4.78e-05 ps=4.78e-05 nrd=0.0975 nrs=0.0975
+MM4 out1 net1 VSS VSS N L=4.0u W=20u ad=7.8e-11 as=7.8e-11 pd=4.78e-05 ps=4.78e-05 nrd=0.0975 nrs=0.0975
+MM7 VOUT vbp VDD VDD P L=5.0u W=240u ad=9.36e-10 as=9.36e-10 pd=0.0004878 ps=0.0004878 nrd=0.008125 nrs=0.008125
+MM6 VOUT out1 VSS VSS N L=4.0u W=240u ad=9.36e-10 as=9.36e-10 pd=0.0004878 ps=0.0004878 nrd=0.008125 nrs=0.008125
+Rbias vbp VSS 95k
+Cc out1 rz_node 3.5p
+Rz rz_node VOUT 3.2k
+**** begin user architecture code
+
+* SCL 1.2um Two-Stage CMOS Op-Amp
+* M1, M2 (Diff Pair): W=120um, L=3.0um (PMOS)
+* M3, M4 (Active Load): W=20um, L=4.0um (NMOS)
+* M5 (Tail Current): W=40um, L=5.0um (PMOS)
+* M6 (Stage 2 CS): W=240um, L=4.0um (NMOS)
+* M7 (Stage 2 Load): W=240um, L=5.0um (PMOS)
+* M8 (Bias Diode): W=40um, L=5.0um (PMOS)
+* Rbias = 95k, Cc = 3.5pF, Rz = 3.2k
+
+
+**** end user architecture code
+.ends
+.end

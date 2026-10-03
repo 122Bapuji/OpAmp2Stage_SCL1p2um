@@ -1,0 +1,11 @@
+================================================================================
+SCL 1.2 um CMOS TWO-STAGE OP-AMP - COMMON-MODE REJECTION RATIO (CMRR) REPORT
+================================================================================
+Differential-Mode DC Gain (Ad0) : 70.26 dB
+Common-Mode DC Gain (Acm0)       : -2.14 dB
+DC CMRR (Ad0 - Acm0)             : 72.40 dB (Target >= 60 dB) -> MET
+CMRR @ 1 kHz                     : 72.40 dB
+CMRR @ 10 kHz                    : 72.40 dB
+CMRR @ 100 kHz                   : 72.36 dB
+CMRR @ 1 MHz                     : 69.53 dB
+================================================================================

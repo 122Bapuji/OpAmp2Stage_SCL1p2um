@@ -1,0 +1,9 @@
+set env(PDK_ROOT) /home/vlsi_bbn/open_source_scl_c1d/open_pdks
+set env(PDK) scl_c1d
+
+set PDK_ROOT $env(PDK_ROOT)
+set PDK $env(PDK)
+
+set WORKING_DIR /mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/xschem
+
+source ${PDK_ROOT}/${PDK}/libs.tech/xschem/xschemrc

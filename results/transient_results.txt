@@ -1,0 +1,13 @@
+================================================================================
+SCL 1.2 um CMOS TWO-STAGE OP-AMP - TRANSIENT RESPONSE & SLEW RATE REPORT
+================================================================================
+Load Capacitance (CL)           : 10.0 pF
+Positive Slew Rate (SR+)        : 8.90 V/us (Target >= 5 V/us) -> MET
+Negative Slew Rate (SR-)        : 11.76 V/us (Target >= 5 V/us) -> MET
+Large-Signal Rise Time (10-90%) : 269.80 ns
+Large-Signal Fall Time (90-10%) : 204.00 ns
+Positive Overshoot              : 0.11 % (Vmax = 4.0034 V)
+Negative Overshoot              : 0.97 % (Vmin = 0.9710 V)
+Small-Signal Overshoot          : 4.55 %
+Settling Behavior               : Smooth monotonic / critically damped, no ringing
+================================================================================

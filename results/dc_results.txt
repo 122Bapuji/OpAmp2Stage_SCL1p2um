@@ -1,0 +1,25 @@
+================================================================================
+SCL 1.2 um CMOS TWO-STAGE OP-AMP - DC OPERATING POINT & TRANSFER REPORT
+================================================================================
+Supply Voltage (VDD - VSS)    : 5.00 V
+Quiescent Current (Iq)        : 312.87 uA (0.3129 mA)
+Static Power Dissipation      : 1.564 mW
+Systematic Input Offset (Vos) : -0.686 mV
+DC Incremental Voltage Gain   : 3257.9 V/V (70.26 dB)
+Linear Output Voltage Swing   : 0.276 V to 4.617 V (Av > 500)
+Input Common-Mode Range (ICMR): 0.090 V to 5.000 V (Error < 10 mV)
+
+--------------------------------------------------------------------------------
+TRANSISTOR OPERATING POINT DETAILS (ALL TRANSISTORS IN SATURATION):
+--------------------------------------------------------------------------------
+Device   Type   W/L (um)     Id (uA)    Vgs (V)    Vds (V)    Vth (V)    Vdsat (V)  gm (uS)    gds (uS)   Region      
+------------------------------------------------------------------------------------------------------------
+M1       PMOS   120 / 3.0    18.73      1.255      2.568      1.099      0.113      257.6      3.15       SATURATION  
+M2       PMOS   120 / 3.0    18.69      1.255      2.613      1.099      0.112      257.6      3.13       SATURATION  
+M3       NMOS   20 / 4.0     18.73      1.187      1.187      0.828      0.264      97.9       0.76       SATURATION  
+M4       NMOS   20 / 4.0     18.69      1.187      1.141      0.828      0.264      97.8       0.77       SATURATION  
+M5       PMOS   40 / 5.0     37.42      1.400      1.245      0.777      0.443      107.0      3.13       SATURATION  
+M6       NMOS   240 / 4.0    237.57     1.141      2.499      0.792      0.258      1259.8     8.77       SATURATION  
+M7       PMOS   240 / 5.0    237.57     1.400      2.500      0.797      0.429      675.0      16.71      SATURATION  
+M8       PMOS   40 / 5.0     37.89      1.400      1.400      0.777      0.443      107.9      3.03       SATURATION  
+================================================================================

@@ -1,0 +1,71 @@
+** sch_path: /mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/xschem/tb_opamp.sch
+**.subckt tb_opamp
+x1 INP INM VOUT VDD VSS opamp_2stage
+V_VDD VDD VSS 5.0
+V_VSS VSS GND 0.0
+CL VOUT VSS 10p
+V_CM VCM VSS 2.5
+V_SIG INP VCM dc 0 ac 1 pulse(1.0 4.0 100n 10n 10n 500n 1200n)
+L_DC INM VOUT 1e6
+C_AC INM VCM 1e6
+**** begin user architecture code
+
+* SCL 1.2um Technology Models
+.lib '/home/vlsi_bbn/open_source_scl_c1d/open_pdks/scl_c1d/libs.tech/ngpsice/model/hspice/models49/header.lib' NOM
+
+
+
+* Simulation Commands
+.control
+set color0=white
+set color1=black
+set color2=blue
+set color3=red
+op
+ac dec 20 1 100Meg
+plot db(vout) title 'AC Gain (dB)'
+tran 0.5n 1500n
+plot v(inp) v(vout) title 'Transient Large-Signal Step (CL=10pF)'
+.endc
+
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  opamp_2stage.sym # of pins=5
+** sym_path: /mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/xschem/opamp_2stage.sym
+** sch_path: /mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/xschem/opamp_2stage.sch
+.subckt opamp_2stage INP INM VOUT VDD VSS
+*.ipin INP
+*.ipin INM
+*.opin VOUT
+*.ipin VDD
+*.ipin VSS
+MM8 vbp vbp VDD VDD P L=5.0u W=40u ad=1.56e-10 as=1.56e-10 pd=8.78e-05 ps=8.78e-05 nrd=0.04875 nrs=0.04875
+MM5 tail vbp VDD VDD P L=5.0u W=40u ad=1.56e-10 as=1.56e-10 pd=8.78e-05 ps=8.78e-05 nrd=0.04875 nrs=0.04875
+MM1 net1 INM tail VDD P L=3.0u W=120u ad=4.68e-10 as=4.68e-10 pd=0.0002478 ps=0.0002478 nrd=0.01625 nrs=0.01625
+MM2 out1 INP tail VDD P L=3.0u W=120u ad=4.68e-10 as=4.68e-10 pd=0.0002478 ps=0.0002478 nrd=0.01625 nrs=0.01625
+MM3 net1 net1 VSS VSS N L=4.0u W=20u ad=7.8e-11 as=7.8e-11 pd=4.78e-05 ps=4.78e-05 nrd=0.0975 nrs=0.0975
+MM4 out1 net1 VSS VSS N L=4.0u W=20u ad=7.8e-11 as=7.8e-11 pd=4.78e-05 ps=4.78e-05 nrd=0.0975 nrs=0.0975
+MM7 VOUT vbp VDD VDD P L=5.0u W=240u ad=9.36e-10 as=9.36e-10 pd=0.0004878 ps=0.0004878 nrd=0.008125 nrs=0.008125
+MM6 VOUT out1 VSS VSS N L=4.0u W=240u ad=9.36e-10 as=9.36e-10 pd=0.0004878 ps=0.0004878 nrd=0.008125 nrs=0.008125
+Rbias vbp VSS 95k
+Cc out1 rz_node 3.5p
+Rz rz_node VOUT 3.2k
+**** begin user architecture code
+
+* SCL 1.2um Two-Stage CMOS Op-Amp
+* M1, M2 (Diff Pair): W=120um, L=3.0um (PMOS)
+* M3, M4 (Active Load): W=20um, L=4.0um (NMOS)
+* M5 (Tail Current): W=40um, L=5.0um (PMOS)
+* M6 (Stage 2 CS): W=240um, L=4.0um (NMOS)
+* M7 (Stage 2 Load): W=240um, L=5.0um (PMOS)
+* M8 (Bias Diode): W=40um, L=5.0um (PMOS)
+* Rbias = 95k, Cc = 3.5pF, Rz = 3.2k
+
+
+**** end user architecture code
+.ends
+
+.GLOBAL GND
+.end

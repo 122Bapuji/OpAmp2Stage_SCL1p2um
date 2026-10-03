@@ -1,0 +1,16 @@
+================================================================================
+SCL 1.2 um CMOS TWO-STAGE OP-AMP - AC FREQUENCY RESPONSE REPORT
+================================================================================
+Load Capacitance (CL)           : 10.0 pF
+Miller Capacitor (Cc)           : 3.5 pF
+Nulling Resistor (Rz)           : 3.2 kOhm
+DC Voltage Gain (Av0)           : 70.33 dB (3284.7 V/V)
+3-dB Cutoff Frequency (f_3dB)   : 3100.00 Hz (3.100 kHz)
+Unity-Gain Frequency (UGF / GBW): 10200000.00 Hz (10.200 MHz)
+Phase at Unity-Gain Freq        : -111.70 deg
+Phase Margin (PM)               : 68.30 deg
+Estimated Output Pole (p2)      : ~20.05 MHz (gm6/2pi*CL)
+Target DC Gain (>= 70 dB)       : MET
+Target GBW (>= 5 MHz)           : MET
+Target Phase Margin (>= 60 deg) : MET
+================================================================================
