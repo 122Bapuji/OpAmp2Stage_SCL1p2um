@@ -2,6 +2,7 @@
 """
 Generate a comprehensive, thesis-grade Word document (.docx) report for the
 Two-Stage CMOS Operational Amplifier in SCL 1.2 um CMOS technology.
+Features full two-sided text justification and high-resolution embedded schematic and layout figures.
 """
 
 import os
@@ -30,6 +31,20 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     ''')
     tcPr.append(tcMar)
 
+def add_justified_p(doc, text="", style=None):
+    p = doc.add_paragraph(text, style=style)
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    return p
+
+def add_bullet_justified(doc, bold_prefix, text):
+    p = doc.add_paragraph(style='List Bullet')
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    r_bold = p.add_run(bold_prefix)
+    r_bold.bold = True
+    r_bold.font.color.rgb = RGBColor(0, 51, 102)
+    p.add_run(text)
+    return p
+
 def add_callout(doc, text, title="DESIGN NOTE"):
     table = doc.add_table(rows=1, cols=1)
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -37,6 +52,7 @@ def add_callout(doc, text, title="DESIGN NOTE"):
     set_cell_background(cell, "F0F4F8")
     set_cell_margins(cell, top=140, bottom=140, left=200, right=200)
     p = cell.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p.paragraph_format.space_before = Pt(4)
     p.paragraph_format.space_after = Pt(4)
     r_title = p.add_run(f"[{title}] ")
@@ -44,7 +60,8 @@ def add_callout(doc, text, title="DESIGN NOTE"):
     r_title.font.color.rgb = RGBColor(0, 51, 102)
     r_text = p.add_run(text)
     r_text.font.size = Pt(10)
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    p_sp = doc.add_paragraph()
+    p_sp.paragraph_format.space_after = Pt(4)
 
 def format_table_headers(table, col_widths=None):
     for i, row in enumerate(table.rows):
@@ -73,8 +90,7 @@ def main():
     doc = Document()
 
     # Page setup - 1 inch margins
-    sections = doc.sections
-    for section in sections:
+    for section in doc.sections:
         section.top_margin = Inches(1.0)
         section.bottom_margin = Inches(1.0)
         section.left_margin = Inches(1.0)
@@ -84,9 +100,10 @@ def main():
     normal_style = doc.styles['Normal']
     normal_style.font.name = 'Calibri'
     normal_style.font.size = Pt(11)
-    normal_style.font.color.rgb = RGBColor(51, 51, 51)
+    normal_style.font.color.rgb = RGBColor(40, 40, 40)
     normal_style.paragraph_format.line_spacing = 1.15
     normal_style.paragraph_format.space_after = Pt(6)
+    normal_style.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     # --------------------------------------------------------------------------
     # COVER / TITLE PAGE
@@ -138,14 +155,16 @@ def main():
     h_abs = doc.add_heading("Abstract", level=1)
     h_abs.paragraph_format.space_before = Pt(12)
     
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "This project thesis presents the complete design, transistor sizing, simulation verification, and physical layout "
         "of a high-performance two-stage CMOS operational amplifier designed exclusively in the Semiconductor Complex Limited "
         "(SCL) 1.2 µm CMOS technology (`scl_c1d`) using an entirely open-source electronic design automation (EDA) flow. "
         "The open-source flow encompasses Xschem for hierarchical schematic capture and netlisting, ngspice-45 for rigorous "
         "analog SPICE simulations, and KLayout/Magic for physical GDSII layout synthesis and design rule checking (DRC)."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The amplifier employs a PMOS differential input pair with an NMOS current-mirror active load in the first stage, followed by "
         "an NMOS common-source gain driver with a PMOS active current load in the second stage. Frequency compensation is achieved "
         "via a Miller capacitor combined in series with a nulling resistor configured to cancel the non-dominant output pole via "
@@ -153,7 +172,8 @@ def main():
         "channel-length modulation (low output resistance) exhibited by the SCL 1.2 µm devices at minimum channel length, "
         "necessitating non-minimum gate lengths of 3.0 µm to 5.0 µm."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Extensive simulation results under nominal operating conditions (VDD = 5.0 V, VSS = 0 V, CL = 10 pF, T = 27°C) demonstrate "
         "an open-loop DC voltage gain of 70.33 dB (3284.7 V/V), a unity-gain bandwidth (GBW) of 10.20 MHz, a phase margin of 68.30° "
         "(63.70° in closed-loop buffer configuration), a positive slew rate of 8.90 V/µs, a negative slew rate of 11.76 V/µs, "
@@ -180,7 +200,8 @@ def main():
     doc.add_heading("Chapter 1: Introduction & Project Objectives", level=1)
     
     doc.add_heading("1.1 Background and Motivation", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Operational amplifiers (op-amps) constitute the foundational building block of analog and mixed-signal integrated circuits, "
         "serving ubiquitous roles in sensor interfaces, continuous-time and switched-capacitor filters, analog-to-digital converters (ADCs), "
         "and voltage regulators. Modern IC design often focuses on deep sub-micron nodes (e.g., 28 nm, 16 nm FinFETs); however, mature "
@@ -188,7 +209,8 @@ def main():
         "management, high-voltage analog sensing, and domestic semiconductor manufacturing initiatives in regions establishing sovereign "
         "foundry ecosystems, such as India's Semiconductor Complex Limited (SCL), Chandigarh."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "While mature nodes offer high supply voltage tolerance (5.0 V rail-to-rail operation) and favorable breakdown limits, designing "
         "high-gain, wide-bandwidth operational amplifiers in a 1.2 µm single-poly process presents severe analog design hurdles: "
         "moderate transconductance efficiency (gm/Id), significant channel-length modulation (low Early voltage), substantial parasitic "
@@ -198,30 +220,21 @@ def main():
     )
 
     doc.add_heading("1.2 The Open-Source EDA Paradigm", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Historically, custom analog IC design has been restricted to expensive proprietary EDA suites (e.g., Cadence Virtuoso, "
         "Synopsys Custom Compiler). Recent breakthroughs in open-source EDA tooling have enabled complete silicon-proven flows. "
         "In this work, the entire design and verification pipeline was executed using 100% open-source software:"
     )
     
-    bullet1 = doc.add_paragraph(style='List Bullet')
-    r = bullet1.add_run("Xschem 3.4.8RC: "); r.bold = True
-    bullet1.add_run("A highly capable schematic capture engine with native symbol hierarchy, real-time electrical rule checks (ERC), and SPICE netlist formatting.")
-
-    bullet2 = doc.add_paragraph(style='List Bullet')
-    r = bullet2.add_run("ngspice-45.2: "); r.bold = True
-    bullet2.add_run("The industry standard open-source SPICE simulation engine, featuring native BSIM3v3 parsing, direct KLU linear solvers, and an interactive scripting control language.")
-
-    bullet3 = doc.add_paragraph(style='List Bullet')
-    r = bullet3.add_run("KLayout 0.30.0: "); r.bold = True
-    bullet3.add_run("A fast GDSII/OASIS layout viewer and scriptable layout generator using Python (`pya`), equipped with comprehensive DRC rule evaluation.")
-
-    bullet4 = doc.add_paragraph(style='List Bullet')
-    r = bullet4.add_run("Magic 8.3: "); r.bold = True
-    bullet4.add_run("A mature, interactive VLSI layout system providing technology-driven design rule checks and device extraction.")
+    add_bullet_justified(doc, "Xschem 3.4.8RC: ", "A highly capable schematic capture engine with native symbol hierarchy, real-time electrical rule checks (ERC), and SPICE netlist formatting.")
+    add_bullet_justified(doc, "ngspice-45.2: ", "The industry standard open-source SPICE simulation engine, featuring native BSIM3v3 parsing, direct KLU linear solvers, and an interactive scripting control language.")
+    add_bullet_justified(doc, "KLayout 0.30.0: ", "A fast GDSII/OASIS layout viewer and scriptable layout generator using Python (`pya`), equipped with comprehensive DRC rule evaluation.")
+    add_bullet_justified(doc, "Magic 8.3: ", "A mature, interactive VLSI layout system providing technology-driven design rule checks and device extraction.")
 
     doc.add_heading("1.3 Design Target Specifications", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The project targets are established based on industry-standard general-purpose operational amplifier requirements driving a "
         "substantial capacitive load of 10 pF from a 5.0 V unipolar power supply. Table 1.1 delineates these initial target criteria."
     )
@@ -252,7 +265,10 @@ def main():
             table1.cell(row_idx + 1, col_idx).paragraphs[0].text = text
     format_table_headers(table1, [Inches(1.8), Inches(1.0), Inches(1.5), Inches(2.2)])
 
-    doc.add_paragraph("Table 1.1: Project Target Specifications and Rationale.")
+    p_t1_c = doc.add_paragraph("Table 1.1: Project Target Specifications and Rationale.")
+    p_t1_c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_t1_c.runs[0].font.italic = True
+    p_t1_c.runs[0].font.size = Pt(9.5)
 
     doc.add_page_break()
 
@@ -262,31 +278,32 @@ def main():
     doc.add_heading("Chapter 2: SCL 1.2 µm Process Characterization & Technology Limits", level=1)
     
     doc.add_heading("2.1 Foundry PDK Architecture and BSIM3v3 Models", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The SCL 1.2 µm CMOS process (`scl_c1d`) is a twin-tub, N-well silicon-gate process fabricated on a P-type substrate. "
         "The foundry models supplied in the open-source PDK distribution are BSIM3v3 models (SPICE Level 8 in ngspice, mapped from "
         "HSPICE Level 49). The transistor models are designated as `N` for NMOS and `P` for PMOS devices, configured for 5.0 V nominal "
         "operation with an oxide thickness tox of 23.6 nm (2.36 × 10⁻⁸ m)."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Key physical BSIM3v3 model parameters extracted from the nominal model files include:"
     )
-    b_p1 = doc.add_paragraph(style='List Bullet')
-    b_p1.add_run("NMOS Threshold Voltage (Vth0): ").bold = True; b_p1.add_run("~ 0.82 V; Low-field mobility (U0): ~ 520 cm²/V·s")
-    b_p2 = doc.add_paragraph(style='List Bullet')
-    b_p2.add_run("PMOS Threshold Voltage (Vth0): ").bold = True; b_p2.add_run("~ -0.80 V; Low-field mobility (U0): ~ 185 cm²/V·s")
-    b_p3 = doc.add_paragraph(style='List Bullet')
-    b_p3.add_run("Specific Gate Oxide Capacitance (Cox): ").bold = True; b_p3.add_run("Cox = εox / tox = (3.9 × 8.854 × 10⁻¹⁴ F/cm) / (2.36 × 10⁻⁶ cm) ≈ 1.463 fF/µm² (1.463 × 10⁻³ F/m²)")
+    add_bullet_justified(doc, "NMOS Threshold Voltage (Vth0): ", "~ 0.82 V; Low-field mobility (U0): ~ 520 cm²/V·s")
+    add_bullet_justified(doc, "PMOS Threshold Voltage (Vth0): ", "~ -0.80 V; Low-field mobility (U0): ~ 185 cm²/V·s")
+    add_bullet_justified(doc, "Specific Gate Oxide Capacitance (Cox): ", "Cox = εox / tox = (3.9 × 8.854 × 10⁻¹⁴ F/cm) / (2.36 × 10⁻⁶ cm) ≈ 1.463 fF/µm² (1.463 × 10⁻³ F/m²)")
 
     doc.add_heading("2.2 Severe Channel-Length Modulation at Minimum Length", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "During initial device characterization, DC parametric sweeps were conducted on minimum-geometry transistors (L = 1.2 µm). "
         "A critical finding emerged: at L = 1.2 µm, the PMOS transistor exhibits severe Drain-Induced Barrier Lowering (DIBL) and "
         "channel-length modulation (λ), resulting in an output conductance gds exceeding 125 µS at modest drain currents (~ 20 µA). "
         "The intrinsic single-transistor gain (gm/gds) collapsed to less than 8.5 V/V (18.6 dB). Attempting to build a two-stage op-amp "
         "using minimum-length transistors would yield an overall DC gain under 40 dB, drastically failing the 70 dB specification."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "To combat this physical constraint, analog channel lengths were aggressively scaled upward: the differential pair transistors "
         "were sized with L = 3.0 µm, while current mirror and active load transistors were sized with L = 4.0 µm and L = 5.0 µm. "
         "Increasing the gate length from 1.2 µm to 3.0–5.0 µm lowered gds from > 120 µS down to 3.1 µS for PMOS and 0.77 µS for NMOS, "
@@ -294,7 +311,8 @@ def main():
     )
 
     doc.add_heading("2.3 Physical Metal and Layer Constraints", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The SCL 1.2 µm PDK (`scl_c1d`) is strictly a Single-Poly, Double-Metal (1P2M) process. Unlike advanced analog nodes, this PDK "
         "does NOT feature a secondary polysilicon layer (Poly 2) or a dedicated thin-dielectric metal layer for Poly-Insulator-Poly (PIP) "
         "or Metal-Insulator-Metal (MIM) linear capacitors. Inspection of the foundry design rules and KLayout LVS decks revealed that "
@@ -305,20 +323,16 @@ def main():
     )
 
     doc.add_heading("2.4 Foundry Process Corners", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The PDK incorporates discrete corner card libraries defining variations in carrier mobility, oxide thickness, and threshold "
         "voltages. Five physical corners are supported:"
     )
-    b_c1 = doc.add_paragraph(style='List Bullet')
-    b_c1.add_run("NOM (Typical-Typical, TT): "); b_c1.add_run("Nominal NMOS and PMOS speed and threshold parameters.")
-    b_c2 = doc.add_paragraph(style='List Bullet')
-    b_c2.add_run("SLOW (Slow-Slow, SS): "); b_c2.add_run("Lower mobility, higher threshold voltages, representing worst-case bandwidth.")
-    b_c3 = doc.add_paragraph(style='List Bullet')
-    b_c3.add_run("FAST (Fast-Fast, FF): "); b_c3.add_run("Higher mobility, lower threshold voltages, representing worst-case power and phase margin.")
-    b_c4 = doc.add_paragraph(style='List Bullet')
-    b_c4.add_run("SLOWFAST (Slow NMOS, Fast PMOS, SF): "); b_c4.add_run("Cross-skew corner stressing mirror tracking and offset.")
-    b_c5 = doc.add_paragraph(style='List Bullet')
-    b_c5.add_run("FASTSLOW (Fast NMOS, Slow PMOS, FS): "); b_c5.add_run("Cross-skew corner stressing high-gain stage matching.")
+    add_bullet_justified(doc, "NOM (Typical-Typical, TT): ", "Nominal NMOS and PMOS speed and threshold parameters.")
+    add_bullet_justified(doc, "SLOW (Slow-Slow, SS): ", "Lower mobility, higher threshold voltages, representing worst-case bandwidth.")
+    add_bullet_justified(doc, "FAST (Fast-Fast, FF): ", "Higher mobility, lower threshold voltages, representing worst-case power and phase margin.")
+    add_bullet_justified(doc, "SLOWFAST (Slow NMOS, Fast PMOS, SF): ", "Cross-skew corner stressing mirror tracking and offset.")
+    add_bullet_justified(doc, "FASTSLOW (Fast NMOS, Slow PMOS, FS): ", "Cross-skew corner stressing high-gain stage matching.")
 
     doc.add_page_break()
 
@@ -328,9 +342,11 @@ def main():
     doc.add_heading("Chapter 3: Circuit Architecture & Analytical Sizing Calculations", level=1)
 
     doc.add_heading("3.1 Circuit Topology Selection", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "A classical two-stage architecture was selected for its proven robustness, high gain, and wide output swing. "
-        "Figure 3.1 illustrates the complete circuit schematic of the designed operational amplifier."
+        "Figure 3.1 illustrates the complete circuit schematic of the designed operational amplifier with exact device names, "
+        "transistor sizing, bias circuitry, and compensation components."
     )
 
     # Insert Schematic Image
@@ -338,55 +354,58 @@ def main():
     if os.path.exists(sch_img_path):
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        doc.add_picture(sch_img_path, width=Inches(5.8))
+        doc.add_picture(sch_img_path, width=Inches(6.2))
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_c = p_cap.add_run("Figure 3.1: Complete Schematic of the SCL 1.2 µm Two-Stage CMOS Op-Amp in Xschem.")
+        r_c = p_cap.add_run("Figure 3.1: Detailed Circuit Schematic of the SCL 1.2 µm Two-Stage CMOS Operational Amplifier.")
         r_c.font.italic = True
         r_c.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Key architectural choices and theoretical justifications:"
     )
-    b_t1 = doc.add_paragraph(style='List Bullet')
-    b_t1.add_run("PMOS Differential Input Pair (M1, M2): ").bold = True
-    b_t1.add_run(
+    add_bullet_justified(
+        doc,
+        "PMOS Differential Input Pair (M1, M2): ",
         "In an N-well CMOS process, PMOS transistors reside in individual N-wells that can be tied directly to their source terminals "
         "or to VDD, completely eliminating the body effect (γ = 0) and avoiding threshold modulation across common-mode inputs. "
         "Furthermore, PMOS inputs provide a lower 1/f flicker noise corner and enable the input common-mode range to extend down to ground (VSS = 0 V)."
     )
-    b_t2 = doc.add_paragraph(style='List Bullet')
-    b_t2.add_run("NMOS Active Current Mirror Load (M3, M4): ").bold = True
-    b_t2.add_run(
+    add_bullet_justified(
+        doc,
+        "NMOS Active Current Mirror Load (M3, M4): ",
         "Converts differential pair drain currents into a single-ended high-impedance voltage output at Node 1. Sized with L = 4.0 µm "
         "to maximize output resistance ro4."
     )
-    b_t3 = doc.add_paragraph(style='List Bullet')
-    b_t3.add_run("NMOS Common-Source Gain Driver (M6): ").bold = True
-    b_t3.add_run(
+    add_bullet_justified(
+        doc,
+        "NMOS Common-Source Gain Driver (M6): ",
         "Because electron mobility (µn) is ~ 2.8× higher than hole mobility (µp) in SCL 1.2 µm silicon, utilizing an NMOS driver in the "
         "second stage achieves high transconductance (gm6 ≈ 1.26 mS) at modest current (~ 238 µA). This high gm6 is paramount because "
         "the non-dominant pole is given by p2 ≈ gm6 / CL. High gm6 pushes p2 out to ~ 20 MHz, far beyond the 10 MHz unity-gain bandwidth."
     )
-    b_t4 = doc.add_paragraph(style='List Bullet')
-    b_t4.add_run("PMOS Current Source Load (M7): ").bold = True
-    b_t4.add_run(
+    add_bullet_justified(
+        doc,
+        "PMOS Current Source Load (M7): ",
         "Mirrors the reference current from M8 to provide an active high-impedance pull-up load for the second gain stage."
     )
-    b_t5 = doc.add_paragraph(style='List Bullet')
-    b_t5.add_run("Lead-Lag Miller Compensation (Cc = 3.5 pF, Rz = 3.2 kΩ): ").bold = True
-    b_t5.add_run(
+    add_bullet_justified(
+        doc,
+        "Lead-Lag Miller Compensation (Cc = 3.5 pF, Rz = 3.2 kΩ): ",
         "Standard Miller capacitor Cc causes pole-splitting but generates an undesirable Right-Half-Plane (RHP) zero at z_rhp = +gm6/Cc. "
         "Adding nulling resistor Rz in series moves this zero to z = 1 / [Cc (1/gm6 - Rz)]. By selecting Rz > 1/gm6, the zero shifts into the "
         "Left-Half-Plane (LHP) and is strategically positioned to cancel the non-dominant pole p2, drastically improving phase margin."
     )
 
     doc.add_heading("3.2 Step-by-Step Design Calculations", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The design synthesis proceeded from performance targets to device sizing as follows:"
     )
     
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "1. Compensation Capacitor (Cc) and Slew Rate (SR):\n"
         "To achieve a Phase Margin PM ≥ 60° with a load capacitance CL = 10 pF, Cc was budgeted as approximately 0.35 × CL:\n"
         "    Cc = 3.5 pF\n"
@@ -395,7 +414,8 @@ def main():
         "Applying a design safety margin of 2.1× yields Itail = 37.42 µA, meaning each input transistor carries ID1 = ID2 = 18.71 µA."
     )
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "2. Input Differential Pair Sizing (M1, M2):\n"
         "To achieve a target GBW ≈ 10 MHz:\n"
         "    gm1 = 2π × GBW × Cc = 2π × (10.0 × 10⁶ Hz) × (3.5 × 10⁻¹² F) ≈ 220 µS\n"
@@ -406,7 +426,8 @@ def main():
         "Selecting L1 = 3.0 µm yields W1 = 40 × 3.0 µm = 120 µm (implemented as 4 fingers of 30 µm)."
     )
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "3. Second Stage Transconductance (gm6) and Sizing (M6, M7):\n"
         "For robust phase margin with CL = 10 pF, the non-dominant pole p2 must lie at or beyond 2 × GBW:\n"
         "    f_p2 = gm6 / (2π CL) ≥ 20 MHz  ==>  gm6 ≥ 2π × (20 × 10⁶) × (10 × 10⁻¹²) = 1.256 mS\n"
@@ -417,7 +438,8 @@ def main():
         "Mirror load M7 is sized with L7 = 5.0 µm and W7 = 240 µm (6 fingers × 40 µm)."
     )
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "4. Nulling Resistor (Rz) Derivation for LHP Zero Cancellation:\n"
         "The open-loop transfer function numerator contains a zero at z = 1 / [Cc (1/gm6 - Rz)]. "
         "Equating this zero to cancel the output pole p2 = gm6 / CL yields:\n"
@@ -426,7 +448,8 @@ def main():
     )
 
     doc.add_heading("3.3 Comprehensive Transistor Sizing Table", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Table 3.1 details the finalized device parameters, aspect ratios, finger allocations, and circuit functions for all components."
     )
 
@@ -453,7 +476,10 @@ def main():
             t_size.cell(r_i + 1, c_i).paragraphs[0].text = t
     format_table_headers(t_size, [Inches(0.8), Inches(0.8), Inches(0.9), Inches(0.8), Inches(0.7), Inches(1.1), Inches(2.2)])
 
-    doc.add_paragraph("Table 3.1: Finalized Transistor Sizing and Component Specification Table.")
+    p_t3_c = doc.add_paragraph("Table 3.1: Finalized Transistor Sizing and Component Specification Table.")
+    p_t3_c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_t3_c.runs[0].font.italic = True
+    p_t3_c.runs[0].font.size = Pt(9.5)
 
     doc.add_page_break()
 
@@ -463,7 +489,8 @@ def main():
     doc.add_heading("Chapter 4: Schematic Implementation & Simulation Methodology", level=1)
 
     doc.add_heading("4.1 Hierarchical Schematic Design in Xschem", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The operational amplifier was captured hierarchically in Xschem. The subcircuit block `opamp_2stage.sch` defines the 8 transistors, "
         "compensation network, and bias resistor, mapped to a standardized 5-pin symbol `opamp_2stage.sym` with pins: `INP`, `INM`, "
         "`VOUT`, `VDD`, and `VSS`. The testbench `tb_opamp.sch` instantiates the symbol with ideal power supplies, common-mode source, "
@@ -474,22 +501,24 @@ def main():
     if os.path.exists(tb_img_path):
         p_tb = doc.add_paragraph()
         p_tb.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        doc.add_picture(tb_img_path, width=Inches(5.8))
+        doc.add_picture(tb_img_path, width=Inches(6.2))
         p_cap2 = doc.add_paragraph()
         p_cap2.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r_c2 = p_cap2.add_run("Figure 4.1: Comprehensive Testbench Schematic in Xschem (tb_opamp.sch).")
+        r_c2 = p_cap2.add_run("Figure 4.1: Comprehensive Testbench Schematic Architecture (tb_opamp.sch).")
         r_c2.font.italic = True
         r_c2.font.size = Pt(9.5)
 
     doc.add_heading("4.2 Middlebrook Replica Servo Feedback Methodology", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Simulating high-gain operational amplifiers (Av0 > 70 dB) in open-loop poses a classical SPICE dilemma: microscopic input offsets "
         "(< 1 mV) cause the high-gain output node to saturate at either the positive or negative supply rail during the DC operating point "
         "calculation, completely corrupting small-signal AC analysis. To solve this, a Middlebrook replica feedback network was incorporated "
         "into `tb_opamp.sch`: an ultra-high inductance L_DC = 1.0 TH connects VOUT to INM, while an ultra-high capacitance C_AC = 1.0 TF "
         "connects INM to AC ground (VCM = 2.5 V)."
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "At DC (f = 0 Hz), the inductor acts as a dead short (0 Ω) and the capacitor as an open circuit, establishing 100% negative feedback "
         "that forces VOUT = INM ≈ 2.5 V, guaranteeing an accurate DC operating point where all 8 transistors remain in deep saturation. "
         "At all AC frequencies (f ≥ 1 Hz), the inductor becomes an impenetrable open circuit (Z_L = 2πf × 10¹² Ω) and the capacitor "
@@ -497,23 +526,17 @@ def main():
     )
 
     doc.add_heading("4.3 Automated Verification Scripts", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "To ensure 100% repeatability, an automated verification suite consisting of modular Python extractors and Bash wrapper scripts was developed:"
     )
-    b_s1 = doc.add_paragraph(style='List Bullet')
-    b_s1.add_run("run_dc.sh (sim_dc.py): "); b_s1.add_run("Extracts operating points for M1–M8, systematic offset Vos, and linear output swing.")
-    b_s2 = doc.add_paragraph(style='List Bullet')
-    b_s2.add_run("run_ac.sh (sim_ac.py): "); b_s2.add_run("Extracts DC gain, 3-dB cutoff, GBW, phase margin, and output pole locations.")
-    b_s3 = doc.add_paragraph(style='List Bullet')
-    b_s3.add_run("run_transient.sh (sim_tran.py): "); b_s3.add_run("Measures positive and negative slew rates, 10–90% rise/fall times, and overshoot.")
-    b_s4 = doc.add_paragraph(style='List Bullet')
-    b_s4.add_run("run_cmrr.sh (sim_cmrr.py): "); b_s4.add_run("Simulates differential vs. common-mode gains across 10 Hz–100 MHz.")
-    b_s5 = doc.add_paragraph(style='List Bullet')
-    b_s5.add_run("run_psrr.sh (sim_psrr.py): "); b_s5.add_run("Injects 1 V AC ripple on VDD and VSS rails to extract PSRR+ and PSRR-.")
-    b_s6 = doc.add_paragraph(style='List Bullet')
-    b_s6.add_run("run_corners.sh (sim_corners.py): "); b_s6.add_run("Executes a 15-point PVT matrix across 5 process corners at -40°C, 27°C, and +125°C.")
-    b_s7 = doc.add_paragraph(style='List Bullet')
-    b_s7.add_run("run_all.sh: "); b_s7.add_run("Master automation script executing the complete simulation suite end-to-end.")
+    add_bullet_justified(doc, "run_dc.sh (sim_dc.py): ", "Extracts operating points for M1–M8, systematic offset Vos, and linear output swing.")
+    add_bullet_justified(doc, "run_ac.sh (sim_ac.py): ", "Extracts DC gain, 3-dB cutoff, GBW, phase margin, and output pole locations.")
+    add_bullet_justified(doc, "run_transient.sh (sim_tran.py): ", "Measures positive and negative slew rates, 10–90% rise/fall times, and overshoot.")
+    add_bullet_justified(doc, "run_cmrr.sh (sim_cmrr.py): ", "Simulates differential vs. common-mode gains across 10 Hz–100 MHz.")
+    add_bullet_justified(doc, "run_psrr.sh (sim_psrr.py): ", "Injects 1 V AC ripple on VDD and VSS rails to extract PSRR+ and PSRR-.")
+    add_bullet_justified(doc, "run_corners.sh (sim_corners.py): ", "Executes a 15-point PVT matrix across 5 process corners at -40°C, 27°C, and +125°C.")
+    add_bullet_justified(doc, "run_all.sh: ", "Master automation script executing the complete simulation suite end-to-end.")
 
     doc.add_page_break()
 
@@ -523,7 +546,8 @@ def main():
     doc.add_heading("Chapter 5: Pre-Layout Simulation Results & In-Depth Analysis", level=1)
 
     doc.add_heading("5.1 DC Operating Point Analysis", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "A rigorous DC operating point analysis was performed at nominal supply (VDD = 5.0 V, VSS = 0 V) and T = 27°C with common-mode "
         "input VCM = 2.50 V. Table 5.1 presents the extracted terminal voltages, drain currents, transconductances, and saturation status for all transistors."
     )
@@ -548,9 +572,13 @@ def main():
             t_dc.cell(r_i + 1, c_i).paragraphs[0].text = t
     format_table_headers(t_dc)
 
-    doc.add_paragraph("Table 5.1: Detailed Transistor DC Operating Point Parameters in Saturation.")
+    p_t5_c = doc.add_paragraph("Table 5.1: Detailed Transistor DC Operating Point Parameters in Saturation.")
+    p_t5_c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_t5_c.runs[0].font.italic = True
+    p_t5_c.runs[0].font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Critical observations from Table 5.1:\n"
         "• All eight transistors operate strictly in the SATURATION region.\n"
         "• Vds exceeds Vdsat by massive margins: M1 (2.568 V vs 0.113 V), M2 (2.613 V vs 0.112 V), M6 (2.499 V vs 0.258 V), and M7 (2.500 V vs 0.429 V).\n"
@@ -559,7 +587,8 @@ def main():
     )
 
     doc.add_heading("5.2 DC Transfer Characteristics, Gain, and Linear Output Swing", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The DC open-loop transfer curve was simulated by sweeping differential input voltage from 2.495 V to 2.505 V with 10 µV resolution. "
         "Figure 5.1 plots the resulting transfer characteristic and its numerical derivative (open-loop incremental gain)."
     )
@@ -575,14 +604,16 @@ def main():
         r_c3.font.italic = True
         r_c3.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The linear output swing—defined where incremental gain exceeds 500 V/V—spans from 0.276 V to 4.617 V. "
         "The lower limit is set by Vdsat of NMOS driver M6 (0.258 V), and the upper limit by VDD - |Vdsat7| = 5.0 - 0.429 V = 4.571 V. "
         "This wide swing satisfies the 0.5 V to 4.5 V target."
     )
 
     doc.add_heading("5.3 Common-Mode Input Range (ICMR)", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Figure 5.2 displays the closed-loop voltage follower tracking performance across input voltages from 0.0 V to 5.0 V. "
         "Because PMOS inputs are used, the lower common-mode input limit extends all the way down to 0.090 V before M3 and M4 leave saturation. "
         "Linear tracking is maintained up to 5.000 V with follower tracking error remaining below 10 mV throughout the targeted 1.0 V to 4.0 V range."
@@ -600,7 +631,8 @@ def main():
         r_c4.font.size = Pt(9.5)
 
     doc.add_heading("5.4 AC Frequency Response: Gain, Bandwidth, and Stability", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Figure 5.3 presents the open-loop AC Bode magnitude and phase response from 10 Hz to 100 MHz driving CL = 10 pF."
     )
 
@@ -615,7 +647,8 @@ def main():
         r_c5.font.italic = True
         r_c5.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Extracted AC Performance Metrics:\n"
         "• Low-Frequency DC Gain (Av0): 70.33 dB (3284.7 V/V) [Target ≥ 70 dB: MET]\n"
         "• 3-dB Dominant Pole Cutoff Frequency (f_3dB): 3.10 kHz\n"
@@ -627,7 +660,8 @@ def main():
     )
 
     doc.add_heading("5.5 Transient Response & Slew Rate Measurements", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Transient performance was verified in a unity-gain buffer configuration driving CL = 10 pF. Figure 5.4 displays both the large-signal "
         "pulse response (1.0 V to 4.0 V step) and small-signal step settling (2.45 V to 2.55 V step)."
     )
@@ -654,7 +688,8 @@ def main():
         r_c7.font.italic = True
         r_c7.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Extracted Transient Metrics:\n"
         "• Positive Slew Rate (SR+): 8.90 V/µs [Target ≥ 5.0 V/µs: MET]\n"
         "• Negative Slew Rate (SR-): 11.76 V/µs [Target ≥ 5.0 V/µs: MET]\n"
@@ -664,7 +699,8 @@ def main():
     )
 
     doc.add_heading("5.6 Common-Mode Rejection Ratio (CMRR)", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "CMRR is defined as 20 log10(|Ad| / |Acm|). Figure 5.5 illustrates CMRR from 10 Hz to 100 MHz. "
         "The op-amp achieves a low-frequency CMRR of 72.40 dB, maintaining 72.36 dB at 100 kHz and 69.53 dB at 1 MHz, fully exceeding the 60 dB target."
     )
@@ -681,7 +717,8 @@ def main():
         r_c8.font.size = Pt(9.5)
 
     doc.add_heading("5.7 Power Supply Rejection Ratio (PSRR)", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "PSRR was analyzed by injecting a 1.0 V AC perturbation on the VDD rail (PSRR+) and separately on the VSS rail (PSRR-). "
         "Figure 5.6 shows the frequency response of both rejection parameters."
     )
@@ -697,7 +734,8 @@ def main():
         r_c9.font.italic = True
         r_c9.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "At DC, PSRR+ reaches an outstanding 99.93 dB and PSRR- reaches 84.87 dB, well exceeding the 60 dB target. "
         "PSRR+ remains above 63.8 dB at 100 kHz, providing superb rejection against power supply switching noise."
     )
@@ -708,7 +746,8 @@ def main():
     # CHAPTER 6: PVT CORNER ROBUSTNESS
     # --------------------------------------------------------------------------
     doc.add_heading("Chapter 6: Process, Voltage, and Temperature (PVT) Robustness", level=1)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "To verify that the op-amp will function reliably under manufacturing process spreads and extreme operating temperatures, "
         "a 15-point PVT matrix was simulated spanning 5 process corners (NOM, SLOW, FAST, SLOWFAST, FASTSLOW) across -40°C, +27°C, and +125°C. "
         "Table 6.1 catalogs all 15 simulated corner outcomes."
@@ -741,7 +780,10 @@ def main():
             t_pvt.cell(r_i + 1, c_i).paragraphs[0].text = t
     format_table_headers(t_pvt)
 
-    doc.add_paragraph("Table 6.1: Comprehensive 15-Point PVT Process Corner and Temperature Simulation Matrix.")
+    p_tpvt_c = doc.add_paragraph("Table 6.1: Comprehensive 15-Point PVT Process Corner and Temperature Simulation Matrix.")
+    p_tpvt_c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_tpvt_c.runs[0].font.italic = True
+    p_tpvt_c.runs[0].font.size = Pt(9.5)
 
     pvt_img_path = "/mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/plots/corner_comparison_plot.png"
     if os.path.exists(pvt_img_path):
@@ -754,7 +796,8 @@ def main():
         r_c10.font.italic = True
         r_c10.font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "PVT Performance Summary:\n"
         "• Gain Stability: DC Gain remains between 69.28 dB and 72.33 dB across all corners.\n"
         "• Bandwidth: GBW ranges from 6.18 MHz (SLOW @ 125°C) to 21.19 MHz (FAST @ -40°C), consistently meeting the ≥ 5.0 MHz specification.\n"
@@ -778,12 +821,27 @@ def main():
     doc.add_heading("Chapter 7: Physical Layout Design & Physical Verification", level=1)
 
     doc.add_heading("7.1 Layout Floorplan Strategy", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The physical layout of the operational amplifier was implemented using a procedural Python layout script (`build_layout.py`) "
         "leveraging the KLayout `pya` database API. The total silicon floorplan measures 180.0 µm × 120.0 µm, corresponding to a compact die area "
-        "of 0.0216 mm² (21,600 µm²)."
+        "of 0.0216 mm² (21,600 µm²). Figure 7.1 shows the high-resolution silicon layout generated from the GDSII stream file (`opamp_2stage.gds`)."
     )
-    doc.add_paragraph(
+
+    # Insert Layout Image
+    lay_img_path = "/mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/plots/layout_opamp.png"
+    if os.path.exists(lay_img_path):
+        p_lay = doc.add_paragraph()
+        p_lay.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        doc.add_picture(lay_img_path, width=Inches(6.0))
+        p_cap_lay = doc.add_paragraph()
+        p_cap_lay.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        r_clay = p_cap_lay.add_run("Figure 7.1: Synthesized Silicon Layout of the Two-Stage Op-Amp in SCL 1.2 µm (180 µm × 120 µm, KLayout GDSII).")
+        r_clay.font.italic = True
+        r_clay.font.size = Pt(9.5)
+
+    add_justified_p(
+        doc,
         "The layout is structured into two horizontal partitions:\n"
         "1. Upper N-Well Region (y = 55 µm to 118 µm): Contains all PMOS transistors (M1/M2 diff-pair, M5 tail, M7 output load, M8 bias diode) "
         "within an enclosed N-well, flanked by continuous N-well contact taps tied to the top VDD power bus.\n"
@@ -792,25 +850,26 @@ def main():
     )
 
     doc.add_heading("7.2 Analog Layout Matching Techniques", level=2)
-    b_l1 = doc.add_paragraph(style='List Bullet')
-    b_l1.add_run("Common-Centroid Interdigitation (M1, M2): ").bold = True
-    b_l1.add_run(
+    add_bullet_justified(
+        doc,
+        "Common-Centroid Interdigitation (M1, M2): ",
         "The PMOS differential pair is divided into four 30 µm × 3.0 µm fingers arranged in an A-B-B-A pattern. This configuration cancels linear "
         "gradients in oxide thickness and threshold voltage across the silicon substrate, suppressing offset voltage drift."
     )
-    b_l2 = doc.add_paragraph(style='List Bullet')
-    b_l2.add_run("Current Mirror Matching (M3/M4 and M5/M7/M8): ").bold = True
-    b_l2.add_run(
+    add_bullet_justified(
+        doc,
+        "Current Mirror Matching (M3/M4 and M5/M7/M8): ",
         "All current mirror devices share identical channel lengths, poly orientation, and finger pitches, minimizing edge lithography variations."
     )
-    b_l3 = doc.add_paragraph(style='List Bullet')
-    b_l3.add_run("Low-Impedance Power Routing: ").bold = True
-    b_l3.add_run(
+    add_bullet_justified(
+        doc,
+        "Low-Impedance Power Routing: ",
         "The VDD and VSS rails are implemented as 13 µm wide buses utilizing both Metal 1 and Metal 2 layers, keeping supply IR drops below 0.15 mV."
     )
 
     doc.add_heading("7.3 Design Rule Check (DRC) Results", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "The synthesized GDSII layout (`opamp_2stage.gds`) was subjected to automated Design Rule Checking using the official SCL rule deck "
         "`c1d_drc.drc` inside KLayout. The run report was saved to `layout/scl_drc.txt`. The procedural script established the correct structural "
         "placements; identified DRC violations were related to active diffusion-to-well tap spacings (rules 1.3.2, 1.3.3: min 3.5 µm) and "
@@ -819,10 +878,12 @@ def main():
     )
 
     doc.add_heading("7.4 LVS and Parasitic Extraction (PEX) Assessment", level=2)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "A rigorous audit of the SCL 1.2 µm open-source PDK extraction tools was performed. The findings are documented with total transparency:"
     )
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "1. LVS Deck Limitations: The official SCL LVS deck (`lvs_os_scl_c1d.lvs`) recognizes only 10 legal primitive devices: NMOS, PMOS, "
         "5 resistor types, and 3 junction diodes. There is NO capacitor extraction rule. Because the op-amp netlist requires a 3.5 pF Miller capacitor, "
         "the standard LVS deck cannot extract or match the capacitor from layout.\n"
@@ -837,7 +898,8 @@ def main():
     # CHAPTER 8: CONCLUSIONS & FINAL PERFORMANCE TABLE
     # --------------------------------------------------------------------------
     doc.add_heading("Chapter 8: Conclusion & Summary", level=1)
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "A high-gain, wideband, power-efficient two-stage CMOS operational amplifier has been successfully designed, characterized, "
         "and verified in the SCL 1.2 µm CMOS process using an end-to-end open-source EDA flow. Table 8.1 presents the final comparison "
         "between target specifications and verified simulation results."
@@ -871,9 +933,13 @@ def main():
             t_final.cell(r_i + 1, c_i).paragraphs[0].text = t
     format_table_headers(t_final, [Inches(2.2), Inches(1.5), Inches(1.8), Inches(1.3)])
 
-    doc.add_paragraph("Table 8.1: Final Project Performance and Compliance Matrix.")
+    p_t8_c = doc.add_paragraph("Table 8.1: Final Project Performance and Compliance Matrix.")
+    p_t8_c.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_t8_c.runs[0].font.italic = True
+    p_t8_c.runs[0].font.size = Pt(9.5)
 
-    doc.add_paragraph(
+    add_justified_p(
+        doc,
         "Key Accomplishments:\n"
         "1. 100% Target Fulfillment: Every single electrical target was met or exceeded under realistic heavy loading (CL = 10 pF).\n"
         "2. Ultra-Low Power Consumption: The op-amp consumes only 1.56 mW, leaving vast power budget for auxiliary circuitry.\n"
@@ -883,7 +949,7 @@ def main():
     )
 
     doc.add_heading("References", level=2)
-    doc.add_paragraph(
+    p_ref = doc.add_paragraph(
         "1. B. Razavi, Design of Analog CMOS Integrated Circuits, 2nd ed. McGraw-Hill, 2017.\n"
         "2. P. E. Allen and D. R. Holberg, CMOS Analog Circuit Design, 3rd ed. Oxford University Press, 2011.\n"
         "3. P. R. Gray, P. J. Hurst, S. H. Lewis, and R. G. Meyer, Analysis and Design of Analog Integrated Circuits, 5th ed. Wiley, 2009.\n"
@@ -891,6 +957,7 @@ def main():
         "5. S. Schippers, Xschem Schematic Capture Tool Documentation, 2024. [Online]. Available: https://xschem.sourceforge.io\n"
         "6. H. Vogt et al., Ngspice Circuit Simulator User's Manual Version 45, 2025. [Online]. Available: https://ngspice.sourceforge.io"
     )
+    p_ref.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     out_path = "/mnt/g/VLSI_Projects/OpAmp2Stage_SCL1p2um/reports/OpAmp2Stage_Project_Thesis.docx"
     doc.save(out_path)
